@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>約去哪神器</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <header class="masthead">
+    <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
+      <path d="M8 6c-3.3 0-6 2.6-6 5.9C2 16.4 8 23 8 23s6-6.6 6-11.1C14 8.6 11.3 6 8 6z" fill="#2F6FDB"/>
+      <path d="M32 4c-3.3 0-6 2.6-6 5.9C26 14.4 32 21 32 21s6-6.6 6-11.1C38 6.6 35.3 4 32 4z" fill="#D6336C"/>
+      <path d="M8 23 C12 30 16 33 20 34 M32 21 C30 28 25 32 20 34" fill="none" stroke="currentColor" opacity=".5" stroke-width="1.6" stroke-dasharray="2.5 2.5"/>
+      <circle cx="20" cy="34" r="4.5" fill="#DD5419"/>
+    </svg>
+    <div class="brand-text">
+      <h1>約去哪神器</h1>
+      <p>用 Google 地圖的真實地點、班表和路況，找出最好約的地方，排好出發時間和行程順序。</p>
+    </div>
+    <button class="btn small" id="key-btn" type="button">API 金鑰</button>
+  </header>
+
+  <div class="layout">
+    <aside class="panel">
+      <div class="tabs" role="tablist">
+        <button role="tab" id="tab-meet" aria-selected="true" aria-controls="pane-meet" data-tab="meet">見面地點</button>
+        <button role="tab" id="tab-trip" aria-selected="false" aria-controls="pane-trip" data-tab="trip">行程規劃</button>
+      </div>
+
+      <section id="pane-meet" class="pane" role="tabpanel" aria-labelledby="tab-meet">
+        <div class="block">
+          <div class="block-head"><h2>誰要來</h2><span class="hint" id="friend-count"></span></div>
+          <div id="friends"></div>
+          <div class="row-actions"><button class="btn" id="add-friend" type="button">＋ 新增朋友</button></div>
+          <p class="hint">輸入地址、店名、站名都可以（Google 地點搜尋），也能貼座標，或在地圖上點某個地點。</p>
+        </div>
+
+        <div class="block">
+          <h2>約在哪種地方</h2>
+          <div class="chips" id="cats"></div>
+          <div><label class="lbl" for="keyword">或輸入關鍵字</label><input type="text" id="keyword" placeholder="例如：火鍋、桌遊店、親子餐廳"></div>
+          <label class="check"><input type="checkbox" id="min-rating"> 只要 Google 評分 4.0 以上</label>
+        </div>
+
+        <div class="block">
+          <h2>時間和條件</h2>
+          <div class="grid3">
+            <div><label class="lbl" for="meet-date">日期</label><input type="date" id="meet-date"></div>
+            <div><label class="lbl" for="meet-time">見面時間</label><input type="time" id="meet-time"></div>
+            <div><label class="lbl" for="buffer">提早到</label>
+              <select id="buffer"><option value="0">準時</option><option value="5">5 分鐘</option><option value="10">10 分鐘</option><option value="15">15 分鐘</option><option value="20">20 分鐘</option></select></div>
+          </div>
+          <div>
+            <label class="lbl">優先考量</label>
+            <div class="seg" id="obj" role="group" aria-label="優先考量">
+              <button type="button" data-v="balanced">平衡</button>
+              <button type="button" data-v="max">最公平</button>
+              <button type="button" data-v="sum">總時間最少</button>
+            </div>
+            <p class="hint" id="obj-hint" style="margin-top:6px"></p>
+          </div>
+          <div class="grid2">
+            <div><label class="lbl" for="max-per">每人最多花<span class="range-val" id="max-per-v"></span></label><input type="range" id="max-per" min="20" max="300" step="10"></div>
+            <div><label class="lbl" for="topn">列出</label>
+              <select id="topn"><option value="3">前 3 名</option><option value="5">前 5 名</option><option value="8">前 8 名</option></select></div>
+          </div>
+        </div>
+
+        <div class="block">
+          <button class="btn primary big" id="run-meet" type="button">找見面地點</button>
+          <p class="status" id="meet-status" hidden></p>
+        </div>
+
+        <div class="block" id="results-block" hidden>
+          <div class="block-head"><h2>推薦地點</h2><span class="hint" id="res-hint"></span></div>
+          <ol class="results" id="results"></ol>
+        </div>
+
+        <div class="block" id="detail" hidden></div>
+      </section>
+
+      <section id="pane-trip" class="pane" role="tabpanel" aria-labelledby="tab-trip" hidden>
+        <div class="block">
+          <h2>從哪出發</h2>
+          <div><label class="lbl" for="trip-start-in">出發地</label><div id="trip-start"></div></div>
+          <div class="grid2">
+            <div><label class="lbl" for="trip-date">日期</label><input type="date" id="trip-date"></div>
+            <div><label class="lbl" for="trip-time">出發時間</label><input type="time" id="trip-time"></div>
+          </div>
+          <div class="grid2">
+            <div><label class="lbl" for="trip-mode">交通方式</label><select id="trip-mode"></select></div>
+            <div><label class="lbl" for="trip-end">結束在</label>
+              <select id="trip-end"><option value="loop">回到出發地</option><option value="open">最後一站</option><option value="fixed">指定終點</option></select></div>
+          </div>
+          <div id="trip-endloc-wrap" hidden><label class="lbl" for="trip-endloc-in">終點</label><div id="trip-endloc"></div></div>
+        </div>
+        <div class="block">
+          <div class="block-head"><h2>要去哪些地方</h2><span class="hint">順序不用排，會算出最順的走法</span></div>
+          <div id="stops"></div>
+          <div class="row-actions"><button class="btn" id="add-stop" type="button">＋ 新增地點</button></div>
+          <p class="hint">「最早」是開門或活動開始時間，早到會等；「最晚抵達」會盡量排在那之前。</p>
+        </div>
+        <div class="block">
+          <button class="btn primary big" id="run-trip" type="button">排行程</button>
+          <p class="status" id="trip-status" hidden></p>
+        </div>
+        <div class="block" id="trip-block" hidden>
+          <div class="block-head"><h2>建議行程</h2><span class="hint" id="trip-hint"></span></div>
+          <div id="trip-result"></div>
+        </div>
+      </section>
+
+      <p class="foot">地點來自 Google Places，交通時間來自 Google Routes：大眾運輸依指定日期時間的班表，開車與機車含預測路況。開車另加 10 分鐘停車、計程車加 5 分鐘等車。</p>
+    </aside>
+
+    <section class="mapwrap" aria-label="地圖">
+      <div id="map"></div>
+      <div class="legend" id="legend"></div>
+      <div class="pick-banner" id="pick-banner" hidden><span id="pick-text">在地圖上點一個地點或位置</span><button type="button" id="pick-cancel">取消</button></div>
+      <div class="setup" id="setup" hidden>
+        <form class="setup-card" id="key-form">
+          <h2>先設定 Google Maps API 金鑰</h2>
+          <p class="hint" style="font-size:13.5px">地點搜尋、班表和路況都來自 Google，需要你自己的金鑰。金鑰只存在這台電腦的瀏覽器裡。</p>
+          <ol>
+            <li>到 <a class="ext" href="https://console.cloud.google.com/google/maps-apis/" target="_blank" rel="noopener">Google Cloud Console ↗</a> 建立專案並設定帳單。</li>
+            <li>啟用三個 API：<code>Maps JavaScript API</code>、<code>Places API (New)</code>、<code>Routes API</code>。</li>
+            <li>建立 API 金鑰。應用程式限制選「網站」，加入 <code>http://localhost:8080/*</code>；API 限制勾選上面三個。</li>
+            <li>把金鑰貼在下面。</li>
+          </ol>
+          <p class="err" id="key-err" hidden></p>
+          <div class="setup-row"><input type="password" id="key-input" placeholder="AIza…" autocomplete="off" aria-label="API 金鑰"><button class="btn primary" type="submit">儲存</button></div>
+          <button class="btn link" type="button" id="key-cancel" hidden>先不改</button>
+        </form>
+      </div>
+    </section>
+  </div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
